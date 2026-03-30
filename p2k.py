@@ -176,7 +176,7 @@ if __name__ == "__main__":
         if fileext.upper() == '.PCB':
             print("processing", name_infile)
             with open(name_infile, "rb") as ppcb:
-                kpcb = open("kicad/" + filename + ".kicad_pcb", "w+")
+                kpcb = open(os.path.join(kicad_dir, filename + ".kicad_pcb"), "w+")
                 kpcblib_path = os.path.join("kicad", filename + "_export_pcb.pretty")
-                kpro = open("kicad/" + filename + ".kicad_pro", "w+")
+                kpro = open(os.path.join(kicad_dir, filename + ".kicad_pro"), "w+"), 
                 convert_pcb(filename, ppcb, kpcb, kpcblib_path, kpro)
