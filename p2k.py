@@ -100,11 +100,7 @@ if __name__ == "__main__":
     # Install Ctrl-C handler
     signal.signal(signal.SIGINT, sigint_handler)
 
-    # Create output directory
-    try:
-        os.makedirs('kicad')
-    except FileExistsError:
-        pass
+    # Output directories are created per input file
 
     # Inflate .DDB archives
     for name_infile in args.protelfiles:
@@ -117,9 +113,11 @@ if __name__ == "__main__":
 
             # Check database file and extract schematic/PCB/library
             # All database documents are listed as entries in the 'Items' table.
-            db_dir = os.path.join('db', filename)
+            db_dir = os.path.join(os.path.dirname(name_infile), 'db', filename)
+            kicad_dir = os.path.join(os.path.dirname(name_infile), 'kicad')
             try:
                 os.makedirs(db_dir)
+                os.makedirs(kicad_dir)
             except FileExistsError:
                 pass
             result = subprocess.run(["mdb-json", name_infile, "Items"],
@@ -157,16 +155,16 @@ if __name__ == "__main__":
         if fileext.upper() == '.LIB':
             print("processing", name_infile)
             with open(name_infile, "rb") as plib:
-                kschlib_path = os.path.join("kicad", filename + "_export.kicad_sym")
-                kpcblib_path = os.path.join("kicad", filename + "_export_pcb.pretty")
+                kschlib_path = os.path.join(kicad_dir, filename + "_export.kicad_sym")
+                kpcblib_path = os.path.join(kicad_dir, filename + "_export_pcb.pretty")
                 convert_lib(filename, plib, kschlib_path, kpcblib_path)
 
         if (fileext.upper() == '.SCH') or (fileext.upper() == '.PRJ'):
             print("processing", name_infile)
             with open(name_infile, "rb") as psch:
-                ksch = open("kicad/" + filename + ".kicad_sch", "w+")
-                klib = open("kicad/" + filename + "_export.kicad_sym", "w+")
-                klibpower = open("kicad/" + filename + "_export_power.kicad_sym", "w+")
+                ksch = open(os.path.join(kicad_dir, filename + ".kicad_sch"), "w+")
+                klib = open(os.path.join(kicad_dir, filename + "_export.kicad_sym"), "w+")
+                klibpower = open(os.path.join(kicad_dir, filename + "_export_power.kicad_sym"), "w+")
                 convert_sch(filename, psch, ksch, klib, klibpower)
 
     # PCB files
